@@ -101,7 +101,7 @@ permissions:
 jobs:
 
   validate:
-    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-validate.yml@development
+    uses: .github/workflows/terraform-validate.yml@development
     with:
       environment: ${{ inputs.environment }}
       working_directory: ${{ inputs.module_name }}      
@@ -110,7 +110,7 @@ jobs:
 
   tflint:
     needs: validate
-    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-tflint.yml@development
+    uses: .github/workflows/terraform-tflint.yml@development
     with:
       environment: ${{ inputs.environment }}
       working_directory: ${{ inputs.module_name }}
@@ -118,7 +118,7 @@ jobs:
           GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
   trivy:
     needs: validate
-    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-trivy.yml@development
+    uses: .github/workflows/terraform-trivy.yml@development
     with:
       environment: ${{ inputs.environment }}
       working_directory: ${{ inputs.module_name }}  
@@ -130,7 +130,7 @@ jobs:
      - tflint
      - trivy
      - validate
-    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-test.yml@development
+    uses: .github/workflows/terraform-test.yml@development
     with:
       environment: ${{ inputs.environment }}
       working_directory: ${{ inputs.module_name }}
@@ -143,7 +143,7 @@ jobs:
           
   terraform-plan:
     needs: terraform-test
-    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-plan.yml@development
+    uses: .github/workflows/terraform-plan.yml@development
     with:
       environment: ${{ inputs.environment }}
       working_directory: ${{ inputs.module_name }}
@@ -157,7 +157,7 @@ jobs:
           
   # terraform-opa:
   #   needs: terraform-plan
-  #   uses: ul-iac-modules/ci-templates/.github/workflows/terraform-opa.yml@development
+  #   uses: .github/workflows/terraform-opa.yml@development
   #   with:
   #     environment: ${{ inputs.environment }}
   #     working_directory: ${{ inputs.module_name }}    
@@ -177,7 +177,7 @@ jobs:
 
   terraform-apply:
     needs: manual-approval
-    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-apply.yml@development
+    uses: .github/workflows/terraform-apply.yml@development
     with:
       environment: ${{ inputs.environment }}
       working_directory: ${{ inputs.module_name }}
@@ -200,7 +200,7 @@ jobs:
   terraform-destroy:
     if: inputs.environment == 'Development'
     needs: manual-approval-destroy
-    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-destroy.yml@development
+    uses: .github/workflows/terraform-destroy.yml@development
     with:
       environment: ${{ inputs.environment }}
       working_directory: ${{ inputs.module_name }}
