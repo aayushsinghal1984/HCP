@@ -1,0 +1,163 @@
+name: Terraform child module deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment
+        required: true
+        type: choice
+        options:
+          - Development
+          - production
+
+      module_name:
+        description: Child module name
+        required: true
+        type: choice
+        options:
+          - budget-resource-group
+          - budget-subscription
+          - disk-access
+          - disk-encryption-set
+          - key-vault
+          - key-vault-access-policy
+          - key-vault-key
+          - key-vault-secret
+          - lb-backend-address-pool
+          - lb-backend-address-pool-address
+          - lb-outbound-rule
+          - lb-probe
+          - lb-rule
+          - linux-virtual-machine
+          - load-balancer
+          - log-analytics-workspace
+          - management-group
+          - monitor-action-group
+          - monitor-diagnostic-setting
+          - mssql-database
+          - network-interface
+          - network-security-group
+          - network-security-rule
+          - policy-assignment
+          - policy-definition
+          - privated-dnszone
+          - private-dns-a-record
+          - private-dns-resolver
+          - private-dns-resolver-dns-forwarding-ruleset
+          - private-dns-resolver-forwarding-rule
+          - private-dns-resolver-inbound-endpoint
+          - private-dns-resolver-outbound-endpoint
+          - private-endpoint
+          - public-ip
+          - resource-group
+          - storage-account
+          - storage-account-container
+          - storage-account-customer-managed-key
+          - storage-blob
+          - storage-share
+          - subnet
+          - virtual-network
+          - virtual-network-peering
+          - windows-virtual-machine
+          - managed-disk 
+          - firewall 
+          - monitor-activity-log-alert
+          - monitor-alert-processing-rule-action-group 
+          - managed-disk
+          - bastion-host 
+          - virtual-machine-data-disk-attachment
+          - role-definition
+          - role-assignment
+          - user-assigned-identity
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+jobs:
+
+  validate:
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-validate.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+
+  tflint:
+    needs: validate
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-tflint.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+
+  trivy:
+    needs: validate
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-trivy.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}  
+
+  terraform-test:
+    needs: 
+     - tflint
+     - trivy
+     - validate
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-test.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+
+  terraform-plan:
+    needs: terraform-test
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-plan.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets: inherit    
+
+  # terraform-opa:
+  #   needs: terraform-plan
+  #   uses: ul-iac-modules/ci-templates/.github/workflows/terraform-opa.yml@development
+  #   with:
+  #     environment: ${{ inputs.environment }}
+  #     working_directory: ${{ inputs.module_name }}    
+  #   secrets:
+  #       GH_PAT: ${{ secrets.GH_PAT }}
+
+  manual-approval:
+    needs:
+      - terraform-plan
+      # - terraform-opa
+    runs-on: iac-modules
+    environment:
+      name: approver
+    steps:
+      - name: Waiting For Approval
+        run: echo "Waiting for approval"
+
+  terraform-apply:
+    needs: manual-approval
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-apply.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets: inherit
+
+  manual-approval-destroy:
+    needs: terraform-apply
+    runs-on: iac-modules
+    environment:
+      name: approver
+    steps:
+      - name: Waiting For Approval
+        run: echo "Waiting for approval"
+
+  terraform-destroy:
+    if: inputs.environment == 'Development'
+    needs: manual-approval-destroy
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-destroy.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets: inherit

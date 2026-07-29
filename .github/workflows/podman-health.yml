@@ -1,0 +1,104 @@
+name: Podman Health Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  podman-health:
+    runs-on: iac-modules
+
+    steps:
+      - name: Runner Information
+        run: |
+          echo "=================================="
+          echo "Runner Information"
+          echo "=================================="
+          hostname
+          whoami
+          id
+
+      - name: Docker and Podman Validation
+        shell: bash
+        run: |
+          set +e
+
+          echo "=================================="
+          echo "Binary Locations"
+          echo "=================================="
+          which docker || echo "docker not found"
+          which podman || echo "podman not found"
+
+          echo ""
+          echo "=================================="
+          echo "Versions"
+          echo "=================================="
+          docker --version
+          echo ""
+          podman --version
+
+          echo ""
+          echo "=================================="
+          echo "Environment"
+          echo "=================================="
+          echo "UID=$(id -u)"
+          echo "USER=$(whoami)"
+          echo "XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}"
+
+          echo ""
+          echo "=================================="
+          echo "Podman Info"
+          echo "=================================="
+          podman info
+
+          echo ""
+          echo "=================================="
+          echo "Podman System Info"
+          echo "=================================="
+          podman system info
+
+      - name: Test Container Run
+        shell: bash
+        run: |
+          set +e
+
+          echo "=================================="
+          echo "Running Test Container"
+          echo "=================================="
+
+          podman run --rm docker.io/library/alpine:latest echo "Podman Test Successful"
+
+      - name: Storage Check
+        shell: bash
+        run: |
+          set +e
+
+          echo "=================================="
+          echo "Storage Information"
+          echo "=================================="
+
+          df -h
+
+          echo ""
+          echo "=================================="
+          echo "Podman Disk Usage"
+          echo "=================================="
+
+          podman system df
+
+      - name: Runtime Check
+        shell: bash
+        run: |
+          set +e
+
+          echo "=================================="
+          echo "OCI Runtime Check"
+          echo "=================================="
+
+          podman info | grep -i runtime
+
+          echo ""
+          echo "Available Runtimes"
+          echo "=================================="
+
+          ls -l /usr/bin/crun || true
+          ls -l /usr/bin/runc || true

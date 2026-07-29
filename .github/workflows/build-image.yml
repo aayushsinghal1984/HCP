@@ -1,0 +1,114 @@
+name: Build VM Image
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      environment:
+        description: Environment
+        required: true
+        type: choice
+        options:
+          - Development
+          - production
+
+      image:
+        description: Select Image
+        required: true
+        type: choice
+        options:
+          - rhel-9
+          - rhel-10
+          - ubuntu-24-04
+          - windows-server-2022
+          - windows-server-2025
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  packer_validate:
+
+    uses: ul-iac-modules/ci-templates/.github/workflows/packer-validate.yml@development
+
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: packer-image-builder/${{ inputs.image }}
+
+  opa:
+
+    needs: packer_validate
+
+    uses: ul-iac-modules/ci-templates/.github/workflows/packer-opa.yml@development
+
+    with:
+      environment: ${{ inputs.environment }}
+      image_name: ${{ inputs.image }}
+      opa_repository: ul-iac-modules/opa-policies
+      opa_branch: development
+      policy_path: ${{ inputs.image }}.rego
+
+    secrets:
+      ght_pat: ${{ secrets.GHT_PAT }}
+
+  trivy:
+
+    needs: opa
+
+    uses: ul-iac-modules/ci-templates/.github/workflows/packer-trivy.yml@development
+
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: packer-image-builder/${{ inputs.image }}
+
+  gitleaks:
+
+    needs: trivy
+
+    uses: ul-iac-modules/ci-templates/.github/workflows/packer-gitleaks.yml@development
+
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: packer-image-builder/${{ inputs.image }}
+
+  version:
+
+    needs: gitleaks
+
+    uses: ul-iac-modules/ci-templates/.github/workflows/packer-generate-version.yml@development
+
+    with:
+      image_name: ${{ inputs.image }}
+
+  approval:
+
+    needs: version
+
+    runs-on: iac-modules
+
+    environment:
+      name: approver
+
+    steps:
+
+      - name: Approval Gate
+        run: |
+          echo "Approval received"
+
+  build:
+
+    needs:
+      - approval
+      - version
+
+    uses: ul-iac-modules/ci-templates/.github/workflows/packer-build.yml@development
+
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: packer-image-builder/${{ inputs.image }}
+      image_name: ${{ inputs.image }}
+      image_version: ${{ needs.version.outputs.image_version }}
+
+    secrets: inherit
