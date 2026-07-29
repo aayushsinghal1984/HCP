@@ -1,12 +1,12 @@
 module "resource_group" {
-  source = "./resource-group"
+  source = "../resource-group"
   resource_group_name = var.resource_group_name
   location            = var.location
   resource_group_tags = var.tags
 }
 
 module "virtual_network" {
-  source = "./virtual-network"
+  source = "../virtual-network"
   name                          = var.vnet_name
   resource_group_name           = var.resource_group_name
   location                      = var.location
@@ -17,7 +17,7 @@ module "virtual_network" {
 }
 
 module "subnet" {
-  source = "./subnet"
+  source = "../subnet"
   name                 = var.subnet_name
   resource_group_name  = var.resource_group_name
   virtual_network_name = var.vnet_name
@@ -26,7 +26,7 @@ module "subnet" {
 }
 
 module "network_security_group" {
-  source = "./network-security-group"
+  source = "../network-security-group"
 
   network_security_group_name                = var.nsg_name
   network_security_group_resource_group_name = var.resource_group_name
@@ -36,7 +36,7 @@ module "network_security_group" {
 }
 
 module "network_security_rule" {
-  source = "./network-security-rule"
+  source = "../network-security-rule"
   network_security_rule_name = var.nsg_rule_name
   network_security_group_name          = var.nsg_name
   network_security_resource_group_name = var.resource_group_name
@@ -53,7 +53,7 @@ module "network_security_rule" {
 
 
 module "route_table" {
-  source = "./route-table"
+  source = "../route-table"
   route_table_name                    = var.route_table_name
   route_table_location                = var.location
   resource_group_name                 = var.resource_group_name
@@ -64,7 +64,7 @@ module "route_table" {
   ]
 }
 module "subnet_route_table_association" {
-  source = "./subnet-route-table-association"
+  source = "../subnet-route-table-association"
   subnet_id      = module.subnet.subnet_id
   route_table_id = module.route_table.route_table_id
   depends_on = [
