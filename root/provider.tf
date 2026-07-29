@@ -1,16 +1,22 @@
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.15.0"
+
+  cloud {
+    organization = "Infra-development"
+    workspaces {
+      name = "Terraform-Workspace"
+    }
+  }
 
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.70"
+      version = ">= 4.70.0"
     }
   }
 }
 
 provider "azurerm" {
   features {}
-
-  subscription_id = "5e2ade1f-9bb8-4b4f-874f-5fd49f66c2fa"
+  use_oidc = true
 }
