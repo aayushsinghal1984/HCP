@@ -1,0 +1,212 @@
+name:  UL-IAC Terraform Child Module Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment
+        required: true
+        type: choice
+        options:
+          - Development
+          - production
+
+      module_name:
+        description: Child module name
+        required: true
+        type: choice
+        options:
+          - budget-resource-group
+          - budget-subscription
+          - data-protection-resource-guard
+          - disk-access
+          - disk-encryption-set
+          - image-definition
+          - key-vault
+          - key-vault-access-policy
+          - key-vault-key
+          - key-vault-secret
+          - lb-backend-address-pool
+          - lb-backend-address-pool-address
+          - lb-outbound-rule
+          - lb-probe
+          - lb-rule
+          - linux-virtual-machine
+          - load-balancer
+          - log-analytics-workspace
+          - management-group
+          - monitor-action-group
+          - monitor-diagnostic-setting
+          - mssql-database
+          - mssql-server 
+          - network-interface
+          - network-security-group
+          - network-security-rule
+          - policy-assignment
+          - policy-definition
+          - privated-dnszone
+          - private-dns-a-record
+          - private-dns-resolver
+          - private-dns-resolver-dns-forwarding-ruleset
+          - private-dns-resolver-forwarding-rule
+          - private-dns-resolver-inbound-endpoint
+          - private-dns-resolver-outbound-endpoint
+          - private-endpoint
+          - public-ip
+          - resource-group
+          - recovery-services-vault
+          - shared-image-gallery
+          - storage-account
+          - storage-account-container
+          - storage-account-customer-managed-key
+          - storage-blob
+          - storage-share
+          - subnet
+          - virtual-network
+          - virtual-network-peering
+          - windows-virtual-machine
+          - managed-disk 
+          - firewall 
+          - monitor-activity-log-alert
+          - monitor-alert-processing-rule-action-group 
+          - managed-disk
+          - bastion-host 
+          - virtual-machine-data-disk-attachment
+          - role-definition
+          - role-assignment
+          - user-assigned-identity 
+          - windows-web-app
+          - windows-web-app-slot
+          - linux-web-app
+          - linux-web-app-slot
+          - vm-extension
+          - traffic-manager-profile
+          - traffic-manager-external-endpoint
+          - traffic-manager-azure-endpoint 
+          - route-table
+          - route  
+          - automation-account 
+          - nsg-subnet-association
+          - resource-guard-association
+          - data-protection-resource-guard
+          - application-insights
+          - app-service-plan
+
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+jobs:
+
+  validate:
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-validate.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}      
+    secrets:
+          GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+
+  tflint:
+    needs: validate
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-tflint.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets:
+          GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+  trivy:
+    needs: validate
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-trivy.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}  
+    secrets:
+          GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+          
+  terraform-test:
+    needs: 
+     - tflint
+     - trivy
+     - validate
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-test.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets:
+          GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+          TFC_API_TOKEN: ${{ secrets.TFC_API_TOKEN }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          
+  terraform-plan:
+    needs: terraform-test
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-plan.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets:            
+      GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TFC_API_TOKEN: ${{ secrets.TFC_API_TOKEN }}
+
+          
+  # terraform-opa:
+  #   needs: terraform-plan
+  #   uses: ul-iac-modules/ci-templates/.github/workflows/terraform-opa.yml@development
+  #   with:
+  #     environment: ${{ inputs.environment }}
+  #     working_directory: ${{ inputs.module_name }}    
+  #   secrets:
+  #       GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+        
+  manual-approval:
+    needs:
+      - terraform-plan
+      # - terraform-opa
+    runs-on: iac-modules
+    environment:
+      name: approver
+    steps:
+      - name: Waiting For Approval
+        run: echo "Waiting for approval"
+
+  terraform-apply:
+    needs: manual-approval
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-apply.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets:
+      GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TFC_API_TOKEN: ${{ secrets.TFC_API_TOKEN }}
+
+  manual-approval-destroy:
+    needs: terraform-apply
+    runs-on: iac-modules
+    environment:
+      name: approver
+    steps:
+      - name: Waiting For Approval
+        run: echo "Waiting for approval"
+
+  terraform-destroy:
+    if: inputs.environment == 'Development'
+    needs: manual-approval-destroy
+    uses: ul-iac-modules/ci-templates/.github/workflows/terraform-destroy.yml@development
+    with:
+      environment: ${{ inputs.environment }}
+      working_directory: ${{ inputs.module_name }}
+    secrets: 
+      GHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TFC_API_TOKEN: ${{ secrets.TFC_API_TOKEN }}
