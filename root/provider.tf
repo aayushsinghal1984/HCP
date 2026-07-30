@@ -4,7 +4,7 @@ terraform {
   cloud {
     organization = "Infra-development"
     workspaces {
-      name = "HCP"
+      name = "Terraform-Workspace"
     }
   }
 
