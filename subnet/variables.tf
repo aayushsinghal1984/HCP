@@ -44,11 +44,6 @@ variable "private_link_service_network_policies_enabled" {
   default     = true
 }
 
-variable "service_endpoints" {
-  description = "The list of Service endpoints to associate with the subnet."
-  type        = list(string)
-  default     = []
-}
 
 variable "service_endpoint_policy_ids" {
   description = "The list of IDs of Service Endpoint Policies to associate with the subnet."
