@@ -2,10 +2,10 @@ terraform {
   required_version = ">= 1.15.0"
 
   cloud {
-    organization = "Infra-development"
+    organization = "UL-Terrafrom"
 
     workspaces {
-      name = "Terraform-Workspace"
+      name = "aayush"
     }
   }
 
