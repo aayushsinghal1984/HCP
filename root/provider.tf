@@ -19,4 +19,8 @@ terraform {
 
 provider "azurerm" {
   features {}
+
+  use_oidc        = true
+  subscription_id = var.ARM_SUBSCRIPTION_ID
+  tenant_id       = var.ARM_TENANT_ID
 }
