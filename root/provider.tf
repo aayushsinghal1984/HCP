@@ -17,14 +17,6 @@ terraform {
   }
 }
 
-variable "ARM_SUBSCRIPTION_ID" {
-  type = string
-}
-
-variable "ARM_TENANT_ID" {
-  type = string
-}
-
 provider "azurerm" {
   features {}
 
