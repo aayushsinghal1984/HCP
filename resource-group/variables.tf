@@ -8,7 +8,7 @@ variable "resource_group_name" {
 }
 
 variable "resource_group_tags" {
-  type        = string
+  type        = map(string)
   description = "tag Resource Group"
 }
 
