@@ -1,13 +1,14 @@
 terraform {
   required_version = ">= 1.15.0"
-
-  cloud {
+  
+   cloud {
     organization = "UL-Terrafrom"
 
     workspaces {
-      name = "rg-workspaces"
+      name = "aayush"
     }
   }
+  
 
   required_providers {
     azurerm = {
