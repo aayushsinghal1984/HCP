@@ -1,5 +1,6 @@
-
-
-module "virtual_network" {
-  source = "../"  
+module "resource_group" {
+  source              = "../resource-group"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  resource_group_tags = var.tags
 }
