@@ -2,5 +2,13 @@ variable "location" {
   type        = string
   description = "Location for Resource Group deployment"
 }
+variable "resource_group_name" {
+  type        = string
+  description = "Name for Resource Group "
+}
 
+variable "resource_group_tags" {
+  type        = string
+  description = "tag Resource Group"
+}
 
