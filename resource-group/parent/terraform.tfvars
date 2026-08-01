@@ -2,7 +2,7 @@ resource_group_name = "rg-app-test-eastus-001"
 location            = "eastus"
 
 
-resource_group_tags = {
+tags = {
   Environment = "test"
   Application = "app"
   Owner       = "ulse-team"

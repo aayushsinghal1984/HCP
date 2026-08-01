@@ -1,6 +1,6 @@
 terraform {
-  required_version = ">= 1.15.0"
-  
+  required_version = ">= 1.10.0"  
+
    cloud {
     organization = "UL-Terrafrom"
 
@@ -8,7 +8,6 @@ terraform {
       name = "HCP"
     }
   }
-  
 
   required_providers {
     azurerm = {
