@@ -5,7 +5,7 @@ terraform {
     organization = "UL-Terrafrom"
 
     workspaces {
-      name = "HCP"
+      name = "rg-wrokspace"
     }
   }
 
