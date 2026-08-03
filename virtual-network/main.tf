@@ -5,17 +5,6 @@ resource "azurerm_virtual_network" "virtual_network" {
   address_space       = var.virtual_network_address_space
   dns_servers         = var.virtual_network_dns_servers
   tags                = var.virtual_network_tags
-  dynamic "ddos_protection_plan" {
-    for_each = var.ddos_protection_plan_id != null ? [1] : []
-    content {
-      enable = var.ddos_protection_enable
-      id     = var.ddos_protection_plan_id
-    }
-  }
+ 
 }
 
-resource "azurerm_network_ddos_protection_plan" "ddos" {
-  name                = "ddos-plan-01"
-  location            = "eastus"
-  resource_group_name = "rg-app-test-eastus-001"
-}
