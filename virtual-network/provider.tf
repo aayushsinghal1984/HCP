@@ -1,14 +1,12 @@
 terraform {
-  required_version = ">= 1.15.0"
-
-  cloud {
+  required_version = ">= 1.10.0"
+cloud {
     organization = "TF-INFRA-ORG"
 
     workspaces {
       name = "vnet-workspace"
     }
-  }
-
+  
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -21,6 +19,5 @@ provider "azurerm" {
   features {}
 
   use_oidc        = true
-  subscription_id = var.ARM_SUBSCRIPTION_ID
-  tenant_id       = var.ARM_TENANT_ID
+
 }
