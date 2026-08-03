@@ -1,12 +1,14 @@
 terraform {
   required_version = ">= 1.10.0"
-cloud {
+
+  cloud {
     organization = "TF-INFRA-ORG"
 
     workspaces {
       name = "vnet-workspace"
     }
-  
+  }
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -17,7 +19,5 @@ cloud {
 
 provider "azurerm" {
   features {}
-
-  use_oidc        = true
-
+  use_oidc = true
 }
