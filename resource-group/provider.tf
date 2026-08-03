@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.10.0"  
 
    cloud {
-    organization = "UL-Terrafrom"
+    organization = "TF-INFRA-ORG"
 
     workspaces {
       name = "rg-wrokspace"
