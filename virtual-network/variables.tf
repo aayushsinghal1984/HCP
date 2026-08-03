@@ -40,7 +40,7 @@ variable "ddos_protection_plan_id" {
   description = "Enter the ID of DDOS protection plan"
 }
 variable "ddos_protection_enable" {
-  type        = Optinal(bool)
-  default     = Optinal(false)
+  type        = optional(bool)
+  default     = optional(false)
   description = "Controls if DDOS protection plan to be enabled. Defaults to false"
 }
