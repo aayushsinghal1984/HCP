@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.15.0"
 
   cloud {
-    organization = "UL-Terrafrom"
+    organization = "TF-INFRA-ORG"
 
     workspaces {
       name = "nsg-rule-workspace"
@@ -19,8 +19,5 @@ terraform {
 
 provider "azurerm" {
   features {}
-
   use_oidc        = true
-  subscription_id = var.ARM_SUBSCRIPTION_ID
-  tenant_id       = var.ARM_TENANT_ID
 }

@@ -13,3 +13,9 @@ resource "azurerm_virtual_network" "virtual_network" {
     }
   }
 }
+
+resource "azurerm_network_ddos_protection_plan" "ddos" {
+  name                = "ddos-plan-01"
+  location            = "eastus"
+  resource_group_name = "rg-app-test-eastus-001"
+}

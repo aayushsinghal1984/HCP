@@ -1,16 +1,13 @@
-module "network_interface" {
-  source = "../"
 
+  resource_group_name = "rg-app-test-eastus-001"
   name                = "nic-app-test-eastus-001"
   location            = "eastus"
   resource_group_name = "rg-app-test-eastus-001"
-
   dns_servers                    = ["10.0.0.4", "10.0.0.5"]
   edge_zone                      = null
   accelerated_networking_enabled = false
   ip_forwarding_enabled          = false
   internal_dns_name_label        = "nic-app-test"
-
   ip_configurations = [
     {
       name                       = "ipconfig-app-test-eastus-001"
@@ -30,4 +27,3 @@ module "network_interface" {
     Owner       = "ulsc-nic"
     CostCenter  = "ULS-12345"
   }
-}

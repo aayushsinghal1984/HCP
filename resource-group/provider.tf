@@ -1,11 +1,11 @@
 terraform {
-  required_version = ">= 1.15.0"
+  required_version = ">= 1.10.0"  
 
-  cloud {
-    organization = "ULRI-ULSE"
+   cloud {
+    organization = "TF-INFRA-ORG"
 
     workspaces {
-      name = "state-virtual-network"
+      name = "rg-wrokspace"
     }
   }
 
@@ -19,5 +19,5 @@ terraform {
 
 provider "azurerm" {
   features {}
-  use_oidc = true
+  use_oidc        = true
 }
