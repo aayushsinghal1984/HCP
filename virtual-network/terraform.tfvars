@@ -1,4 +1,3 @@
-Terraform
 name                          = "vnet-app-test-eastus-001"
 resource_group_name           = "rg-app-test-eastus-001"
 location                      = "eastus"
