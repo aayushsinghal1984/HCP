@@ -4,7 +4,7 @@ module "subnet" {
 
   name                 = "snet-dns-outbound-endpoint"
   resource_group_name  = "rg-app-test-eastus-001"
-  virtual_network_name = "vnet-app-test-eastus-001"
+  virtual_network_name = "nic-app-test-eastus-001"
 
   address_prefixes = ["10.0.2.0/27"]
 
