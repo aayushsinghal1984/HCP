@@ -2,10 +2,10 @@ terraform {
   required_version = ">= 1.15.0"
 
   cloud {
-    organization = "ULRI-ULSE"
+    organization = "TF-INFRA-ORG"
 
     workspaces {
-      name = "state-subnet"
+      name = "subnet-workspace"
     }
   }
 

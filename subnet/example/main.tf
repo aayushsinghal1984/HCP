@@ -11,7 +11,6 @@ module "subnet" {
   private_endpoint_network_policies             = "Enabled"
   private_link_service_network_policies_enabled = true
 
-  service_endpoints = []
 
   service_endpoint_policy_ids = []
 
