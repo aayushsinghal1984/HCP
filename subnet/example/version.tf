@@ -5,7 +5,7 @@ terraform {
     organization = "ULRI-ULSE"
 
     workspaces {
-      name = "state-subnet"
+      name = "subnet-workspace"
     }
   }
 
